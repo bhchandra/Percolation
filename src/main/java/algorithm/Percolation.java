@@ -25,10 +25,10 @@ public class Percolation {
         verify(n);
         this.n = n;
         this.size = n * n + 2;
-        this.TOP = size - 2;
-        this.BOT = size - 1;
+        this.TOP = size - 1;
+        this.BOT = size;
         status = new int[size + 1];
-        uf = new WeightedQuickUnionUF(size);
+        uf = new WeightedQuickUnionUF(size + 1);
         initialize(status, TOP, BOT, numberOfOpenSites);
 
     }
@@ -158,23 +158,22 @@ public class Percolation {
         validate(row);
         validate(col);
         int index = calculateIndex(row, col);
-
-        return true;
+        return uf.connected(index, TOP);
     }
 
     // number of open sites
     public int numberOfOpenSites() {
-        return 1;
+        return numberOfOpenSites;
     }
 
     // does the system percolate?
     public boolean percolates() {
-        return true;
+        return uf.connected(BOT, TOP);
     }
 
     private void validate(int x) {
-        if (x < 1 || x > size) {
-            throw new IndexOutOfBoundsException();
+        if (x < 1 || x > n) {
+            throw new IndexOutOfBoundsException("index: " + x + " is not < 1 and > " + n + " ");
         }
     }
 
@@ -190,11 +189,29 @@ public class Percolation {
 
     public static void main(String[] args) {
         Percolation p = new Percolation(4);
-        boolean isOpen = p.isOpen(1, 1);
-        System.out.println("isOpen: " + isOpen);
-        
+        System.out.println(p.uf.find(1));
+        System.out.println("isFull: " + p.isFull(1, 1));
         p.open(1, 1);
-        p.open(1, 5);
+        System.out.println("isFull: " + p.isFull(1, 1));
+        System.out.println(p.uf.count());
+        System.out.println(p.uf.find(1));
+        System.out.println(p.uf.find(4));
+        System.out.println("isFull: " + p.isFull(1, 4));
+        p.open(1, 4);
+        System.out.println("isFull: " + p.isFull(1, 4));
+        System.out.println("isFull: " + p.isFull(3, 1));
+        p.open(3, 1);
+        p.open(2, 1);
+        System.out.println("isFull: " + p.isFull(3, 1));
+        System.out.println("Percolates: " + p.percolates());
+        p.open(4, 1);
+        System.out.println("Percolates: " + p.percolates());
+        System.out.println(p.uf.find(1));
+        System.out.println(p.uf.find(4));
+        System.out.println(p.uf.count());
+        System.out.println("UF isConnected: " + p.uf.connected(1, 4));
+        boolean isOpen = p.isOpen(1, 4);
+        System.out.println("isOpen: " + isOpen);
         
         int row = 1;
         int col = 3;

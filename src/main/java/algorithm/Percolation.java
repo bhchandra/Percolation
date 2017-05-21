@@ -15,6 +15,8 @@ public class Percolation {
     private final int TOP;
     private final int BOT;
     private final WeightedQuickUnionUF uf;
+    private int numberOfOpenSites;
+
     //positions of a site  in the 2D grid
     private enum POSITION {LeftTopCorner, RightTopCorner, LeftBotCorner, RightBotCorner, Top, Bot, Left, Right, Middle};
 
@@ -27,14 +29,15 @@ public class Percolation {
         this.BOT = size - 1;
         status = new int[size + 1];
         uf = new WeightedQuickUnionUF(size);
-        initialize(status, TOP, BOT);
+        initialize(status, TOP, BOT, numberOfOpenSites);
 
     }
 
-    private void initialize(int[] status, int TOP, int BOT) {
+    private void initialize(int[] status, int TOP, int BOT, int numberOfOpenSites) {
         IntStream.rangeClosed(1, size).forEach(i -> status[i] = 0);
         status[TOP] = 1;
         status[BOT] = 1;
+        numberOfOpenSites = 0;
     }
 
     // open site (row, col) if it is not open already
@@ -42,14 +45,17 @@ public class Percolation {
         validate(row);
         validate(col);
         int index = calculateIndex(row, col);
-        status[index] = 1;
+        if(status[index] != 1){
+            ++numberOfOpenSites;
+            status[index] = 1;
+        }
+
         performUnion(row, col);
     }
 
     private void performUnion(int row, int col) {
-        
-        POSITION position = findPosition(row, col);
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        final POSITION position = findPosition(row, col);
+        performUnion(row, col, position);
     }
     
     private POSITION findPosition(int row, int col) {
@@ -64,6 +70,78 @@ public class Percolation {
         else if((index - n ) < 0) { x = POSITION.Top;}
         else if((index + n) > size -2){x = POSITION.Bot;}
         return x;
+    }
+    
+    private void performUnion(int row, int col, POSITION position) {
+        final int index = calculateIndex(row, col);
+        final int rightNeighbour = index + 1;
+        final int belowNeighbour = index + n;
+        final int leftNeighbour = index - 1;
+        final int aboveNeighbour = index - n;
+        switch (position) {
+            case LeftTopCorner:
+                unionIfOpen(rightNeighbour, index);
+                unionIfOpen(belowNeighbour, index);
+                unionTOP(index);
+                break;
+            case RightTopCorner:
+                unionIfOpen(leftNeighbour, index);
+                unionIfOpen(belowNeighbour, index);
+                unionTOP(index);
+                break;
+            case LeftBotCorner:
+                unionIfOpen(rightNeighbour, index);
+                unionIfOpen(aboveNeighbour, index);
+                unionBOT(index);
+                break;
+            case RightBotCorner:
+                unionIfOpen(leftNeighbour, index);
+                unionIfOpen(aboveNeighbour, index);
+                unionBOT(index);
+                break;
+            case Left:
+                unionIfOpen(aboveNeighbour, index);
+                unionIfOpen(belowNeighbour, index);
+                unionIfOpen(rightNeighbour, index);
+                break;
+            case Right:
+                unionIfOpen(aboveNeighbour, index);
+                unionIfOpen(leftNeighbour, index);
+                unionIfOpen(belowNeighbour, index);
+                break;
+            case Top:
+                unionIfOpen(belowNeighbour, index);
+                unionIfOpen(leftNeighbour, index);
+                unionIfOpen(rightNeighbour, index);
+                unionTOP(index);
+                break;
+            case Bot:
+                unionIfOpen(aboveNeighbour, index);
+                unionIfOpen(leftNeighbour, index);
+                unionIfOpen(rightNeighbour, index);
+                unionBOT(index);
+                break;
+            case Middle:
+                unionIfOpen(aboveNeighbour, index);
+                unionIfOpen(belowNeighbour, index);
+                unionIfOpen(leftNeighbour, index);
+                unionIfOpen(rightNeighbour, index);
+                break;
+            default:
+                break;
+        }
+    }
+
+    private void unionIfOpen(final int neighbour, final int index) {
+        if (status[neighbour] == 1) { uf.union(neighbour, index); }
+    }
+    
+    private void unionTOP(int index) {
+        uf.union(TOP, index);
+    }
+    
+    private void unionBOT(int index) {
+        uf.union(BOT, index);
     }
     
     
@@ -113,7 +191,11 @@ public class Percolation {
     public static void main(String[] args) {
         Percolation p = new Percolation(4);
         boolean isOpen = p.isOpen(1, 1);
-//        System.out.println("isOpen: " + isOpen);
+        System.out.println("isOpen: " + isOpen);
+        
+        p.open(1, 1);
+        p.open(1, 5);
+        
         int row = 1;
         int col = 3;
         System.out.println("Size: " + p.size + " n: " + p.n);

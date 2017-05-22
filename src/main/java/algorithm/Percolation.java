@@ -8,7 +8,7 @@ import java.util.stream.IntStream;
  * @author MITRA
  */
 public class Percolation {
-    
+
     private final int n;
     private final int size;
     private final int[] status;
@@ -18,7 +18,9 @@ public class Percolation {
     private int numberOfOpenSites;
 
     //positions of a site  in the 2D grid
-    private enum POSITION {LeftTopCorner, RightTopCorner, LeftBotCorner, RightBotCorner, Top, Bot, Left, Right, Middle};
+    private enum POSITION {
+        LeftTopCorner, RightTopCorner, LeftBotCorner, RightBotCorner, Top, Bot, Left, Right, Middle
+    };
 
     // create n-by-n grid, with all sites blocked
     public Percolation(int n) {
@@ -45,7 +47,7 @@ public class Percolation {
         validate(row);
         validate(col);
         int index = calculateIndex(row, col);
-        if(status[index] != 1){
+        if (status[index] != 1) {
             ++numberOfOpenSites;
             status[index] = 1;
         }
@@ -57,21 +59,30 @@ public class Percolation {
         final POSITION position = findPosition(row, col);
         performUnion(row, col, position);
     }
-    
+
     private POSITION findPosition(int row, int col) {
         POSITION x = POSITION.Middle;
         int index = calculateIndex(row, col);
-        if(index == 1){ x = POSITION.LeftTopCorner;}
-        else if( index == n) { x = POSITION.RightTopCorner;}
-        else if( index == size - 2) { x = POSITION.RightBotCorner;}
-        else if( index == size - 1 - n) {x = POSITION.LeftBotCorner;}
-        else if((index % n) == 1 ) { x = POSITION.Left;}
-        else if((index % n) == 0 ) { x = POSITION.Right;}
-        else if((index - n ) < 0) { x = POSITION.Top;}
-        else if((index + n) > size -2){x = POSITION.Bot;}
+        if (index == 1) {
+            x = POSITION.LeftTopCorner;
+        } else if (index == n) {
+            x = POSITION.RightTopCorner;
+        } else if (index == size - 2) {
+            x = POSITION.RightBotCorner;
+        } else if (index == size - 1 - n) {
+            x = POSITION.LeftBotCorner;
+        } else if ((index % n) == 1) {
+            x = POSITION.Left;
+        } else if ((index % n) == 0) {
+            x = POSITION.Right;
+        } else if ((index - n) < 0) {
+            x = POSITION.Top;
+        } else if ((index + n) > size - 2) {
+            x = POSITION.Bot;
+        }
         return x;
     }
-    
+
     private void performUnion(int row, int col, POSITION position) {
         final int index = calculateIndex(row, col);
         final int rightNeighbour = index + 1;
@@ -133,18 +144,19 @@ public class Percolation {
     }
 
     private void unionIfOpen(final int neighbour, final int index) {
-        if (status[neighbour] == 1) { uf.union(neighbour, index); }
+        if (status[neighbour] == 1) {
+            uf.union(neighbour, index);
+        }
     }
-    
+
     private void unionTOP(int index) {
         uf.union(TOP, index);
     }
-    
+
     private void unionBOT(int index) {
         uf.union(BOT, index);
     }
-    
-    
+
     // is site (row, col) open?
     public boolean isOpen(int row, int col) {
         validate(row);
@@ -185,39 +197,6 @@ public class Percolation {
 
     private int calculateIndex(int row, int col) {
         return (row * n) - (n - col);
-    }
-
-    public static void main(String[] args) {
-        Percolation p = new Percolation(4);
-        System.out.println(p.uf.find(1));
-        System.out.println("isFull: " + p.isFull(1, 1));
-        p.open(1, 1);
-        System.out.println("isFull: " + p.isFull(1, 1));
-        System.out.println(p.uf.count());
-        System.out.println(p.uf.find(1));
-        System.out.println(p.uf.find(4));
-        System.out.println("isFull: " + p.isFull(1, 4));
-        p.open(1, 4);
-        System.out.println("isFull: " + p.isFull(1, 4));
-        System.out.println("isFull: " + p.isFull(3, 1));
-        p.open(3, 1);
-        p.open(2, 1);
-        System.out.println("isFull: " + p.isFull(3, 1));
-        System.out.println("Percolates: " + p.percolates());
-        p.open(4, 1);
-        System.out.println("Percolates: " + p.percolates());
-        System.out.println(p.uf.find(1));
-        System.out.println(p.uf.find(4));
-        System.out.println(p.uf.count());
-        System.out.println("UF isConnected: " + p.uf.connected(1, 4));
-        boolean isOpen = p.isOpen(1, 4);
-        System.out.println("isOpen: " + isOpen);
-        
-        int row = 1;
-        int col = 3;
-        System.out.println("Size: " + p.size + " n: " + p.n);
-        System.out.println("Index: " + p.calculateIndex(row, col));
-        System.out.println("Position: " + p.findPosition(row, col));
     }
 
 }

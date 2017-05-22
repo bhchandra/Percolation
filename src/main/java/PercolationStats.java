@@ -62,28 +62,25 @@ public class PercolationStats {
     }
 
     public static void main(String[] args) {
-        int n = 0;
-        int trials = 0;
-        if (args.length > 0) {
+        if (args.length == 0) {
+            System.err.println("Please enter arguments to run the program.");
+            System.err.println("Exiting.");
+        } else if (args.length > 0) {
+            int n = 0;
+            int trials = 0;
             try {
                 n = Integer.parseInt(args[0]);
                 trials = Integer.parseInt(args[1]);
             } catch (NumberFormatException e) {
                 System.err.println("Arguments must be valid integers.");
-                System.exit(1);
             }
-        }
-        if (args.length == 0) {
-            System.err.println("Please enter arguments to run the program.");
-            System.err.println("Exiting.");
-            System.exit(1);
-        }
+            
+            final PercolationStats ps = new PercolationStats(n, trials);
 
-        final PercolationStats ps = new PercolationStats(n, trials);
-
-        StdOut.printf("mean                    = %s\n", ps.mean());
-        StdOut.printf("stddev                  = %s\n", ps.stddev());
-        StdOut.println("95% confidence interval = [" + ps.confidenceLo() + ", " + ps.confidenceHi() + "]");
+            StdOut.printf("mean                    = %s\n", ps.mean());
+            StdOut.printf("stddev                  = %s\n", ps.stddev());
+            StdOut.println("95% confidence interval = [" + ps.confidenceLo() + ", " + ps.confidenceHi() + "]");
+        }
 
     }
 }

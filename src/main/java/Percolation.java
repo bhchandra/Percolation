@@ -8,11 +8,11 @@ import java.util.stream.IntStream;
  */
 public class Percolation {
 
-    private final int n;
+    private final int m;
     private final int size;
     private final int[] status;
-    private final int TOP;
-    private final int BOT;
+    private final int top;
+    private final int bot;
     private final WeightedQuickUnionUF uf;
     private int numberOfOpenSites;
 
@@ -24,21 +24,21 @@ public class Percolation {
     // create n-by-n grid, with all sites blocked
     public Percolation(int n) {
         verify(n);
-        this.n = n;
+        this.m = n;
         this.size = n * n + 2;
-        this.TOP = size - 1;
-        this.BOT = size;
+        this.top = size - 1;
+        this.bot = size;
+        numberOfOpenSites = 0;
         status = new int[size + 1];
         uf = new WeightedQuickUnionUF(size + 1);
-        initialize(status, TOP, BOT, numberOfOpenSites);
+        initialize(status, top, bot);
 
     }
 
-    private void initialize(int[] status, int TOP, int BOT, int numberOfOpenSites) {
+    private void initialize(int[] status, int TOP, int BOT) {
         IntStream.rangeClosed(1, size).forEach(i -> status[i] = 0);
         status[TOP] = 1;
         status[BOT] = 1;
-        numberOfOpenSites = 0;
     }
 
     // open site (row, col) if it is not open already
@@ -64,13 +64,13 @@ public class Percolation {
         int index = calculateIndex(row, col);
         
         if (index == 1) { x = POSITION.LeftTopCorner; } 
-        else if (index == n) {x = POSITION.RightTopCorner; } 
+        else if (index == m) { x = POSITION.RightTopCorner; } 
         else if (index == size - 2) { x = POSITION.RightBotCorner; } 
-        else if (index == size - 1 - n) {x = POSITION.LeftBotCorner; } 
-        else if ((index % n) == 1) { x = POSITION.Left; } 
-        else if ((index % n) == 0) { x = POSITION.Right; } 
-        else if ((index - n) < 0) { x = POSITION.Top; } 
-        else if ((index + n) > size - 2) { x = POSITION.Bot; }
+        else if (index == size - 1 - m) {x = POSITION.LeftBotCorner; } 
+        else if ((index % m) == 1) { x = POSITION.Left; } 
+        else if ((index % m) == 0) { x = POSITION.Right; } 
+        else if ((index - m) < 0) { x = POSITION.Top; } 
+        else if ((index + m) > size - 2) { x = POSITION.Bot; }
         
         return x;
     }
@@ -78,9 +78,9 @@ public class Percolation {
     private void performUnion(int row, int col, POSITION position) {
         final int index = calculateIndex(row, col);
         final int rightNeighbour = index + 1;
-        final int belowNeighbour = index + n;
+        final int belowNeighbour = index + m;
         final int leftNeighbour = index - 1;
-        final int aboveNeighbour = index - n;
+        final int aboveNeighbour = index - m;
         switch (position) {
             case LeftTopCorner:
                 unionIfOpen(rightNeighbour, index);
@@ -142,11 +142,11 @@ public class Percolation {
     }
 
     private void unionTOP(int index) {
-        uf.union(TOP, index);
+        uf.union(top, index);
     }
 
     private void unionBOT(int index) {
-        uf.union(BOT, index);
+        uf.union(bot, index);
     }
 
     // is site (row, col) open?
@@ -162,7 +162,7 @@ public class Percolation {
         validate(row);
         validate(col);
         int index = calculateIndex(row, col);
-        return uf.connected(index, TOP);
+        return uf.connected(index, top);
     }
 
     // number of open sites
@@ -172,23 +172,23 @@ public class Percolation {
 
     // does the system percolate?
     public boolean percolates() {
-        return uf.connected(BOT, TOP);
+        return uf.connected(bot, top);
     }
 
     private void validate(int x) {
-        if (x < 1 || x > n) {
-            throw new IndexOutOfBoundsException("index: " + x + " is not < 1 and > " + n + " ");
+        if (x < 1 || x > m) {
+            throw new IndexOutOfBoundsException("index: " + x + " is not < 1 and > " + m + " ");
         }
     }
 
-    private void verify(int n) throws IllegalArgumentException {
+    private void verify(int n) {
         if (n <= 0) {
             throw new IllegalArgumentException("n should be greater than 0");
         }
     }
 
     private int calculateIndex(int row, int col) {
-        return (row * n) - (n - col);
+        return (row * m) - (m - col);
     }
 
 }
